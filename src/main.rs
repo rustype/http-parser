@@ -2,7 +2,7 @@ mod parser;
 
 use parser::*;
 fn main() {
-    let packet = "POST /cgi-bin/process.cgi HTTP/1.1\r
+    let packet = "POS /cgi-bin/process.cgi HTTP/1.1\r
 User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)\r
 Host: www.tutorialspoint.com\r
 Content-Type: application/x-www-form-urlencoded\r
@@ -14,10 +14,16 @@ Connection: Keep-Alive\r
 licenseID=string&content=string&/paramsXML=string";
     let parser = Parser::start(packet);
     println!("{:#?}", parser);
-    let parser = parser.parse();
-    println!("{:#?}", parser);
-    let parser = parser.parse();
-    println!("{:#?}", parser);
-    let request = parser.parse();
-    println!("{:#?}", request);
+    match parser.parse() {
+        Ok(parser) => {
+            println!("{:#?}", parser);
+            let parser = parser.parse();
+            println!("{:#?}", parser);
+            let request = parser.parse();
+            println!("{:#?}", request);
+        }
+        Err(e) => {
+            eprintln!("{}", e);
+        }
+    }
 }

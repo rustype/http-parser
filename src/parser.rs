@@ -12,7 +12,7 @@ const LF: u8 = '\n' as u8;
 #[doc(hidden)]
 const TAB: u8 = '\t' as u8;
 
-type Result<'a, T> = std::result::Result<T, ParsingError<'a>>;
+type Result<T> = std::result::Result<T, ParsingError>;
 
 /// The HTTP request structure.
 ///
@@ -124,15 +124,20 @@ impl<'a> Parser<'a, RequestLine> {
         }
     }
 
-    fn parse_method(&mut self) {
+    fn parse_method(&mut self) -> Result<()> {
         let mut curr = 0;
         let bytes = self.packet.as_bytes();
         while bytes[curr] != SPACE {
             curr += 1;
         }
-        self.request.method = &self.packet[0..curr];
+        let method = &self.packet[0..curr];
+        if !is_valid_method(method) {
+            return Err(ParsingError::InvalidMethod(method.to_string()));
+        }
+        self.request.method = method;
         self.packet = &self.packet[curr + 1..];
         self.skip_spaces();
+        Ok(())
     }
 
     fn parse_request_uri(&mut self) {
@@ -152,17 +157,17 @@ impl<'a> Parser<'a, RequestLine> {
 }
 
 impl<'a> Parse for Parser<'a, RequestLine> {
-    type NextState = Parser<'a, Header>;
+    type NextState = Result<Parser<'a, Header>>;
 
     fn parse(mut self) -> Self::NextState {
-        self.parse_method();
+        self.parse_method()?;
         self.parse_request_uri();
         self.parse_version();
-        Self::NextState {
+        Ok(Parser::<Header> {
             packet: self.packet,
             request: self.request,
             state: Header,
-        }
+        })
     }
 }
 
@@ -232,29 +237,29 @@ impl<'a> Parse for Parser<'a, Body> {
     }
 }
 
-// Checks if the given string slice is a valid HTTP method according to
-// IETF RFC 2616 [5.1.1](https://tools.ietf.org/html/rfc2616#section-5.1.1).
-//
-// Supported valid methods are:
-// - `OPTIONS`
-// - `GET`
-// - `HEAD`
-// - `POST`
-// - `PUT`
-// - `DELETE`
-// - `TRACE`
-// - `CONNECT`
-// fn is_valid_method(method: &str) -> bool {
-//     match method {
-//         "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "CONNECT" => true,
-//         _ => false,
-//     }
-// }
+/// Checks if the given string slice is a valid HTTP method according to
+/// IETF RFC 2616 [5.1.1](https://tools.ietf.org/html/rfc2616#section-5.1.1).
+///
+/// Supported valid methods are:
+/// - `OPTIONS`
+/// - `GET`
+/// - `HEAD`
+/// - `POST`
+/// - `PUT`
+/// - `DELETE`
+/// - `TRACE`
+/// - `CONNECT`
+fn is_valid_method(method: &str) -> bool {
+    match method {
+        "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "CONNECT" => true,
+        _ => false,
+    }
+}
 
 #[derive(Debug, Error)]
-pub enum ParsingError<'a> {
+pub enum ParsingError {
     #[error("invalid request method {0}")]
-    InvalidMethod(&'a str),
+    InvalidMethod(String),
 }
 
 /// Check if a pair of bytes are CRLF.
