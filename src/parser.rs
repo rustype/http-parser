@@ -148,7 +148,6 @@ impl<'a> Parser<'a, RequestLine> {
         }
         self.request.http_version = &self.packet[..curr];
         self.packet = &self.packet[curr + 2..];
-        // println!("after_version: {}", self.packet);
     }
 }
 
@@ -181,17 +180,14 @@ impl<'a> Parser<'a, Header> {
         }
         let key = &self.packet[0..curr];
         self.packet = &self.packet[curr..];
-        println!("key: {}", key);
 
         // Skip the separator which will match the regex `\s*:\s*`
         let mut curr = 0;
         let bytes = self.packet.as_bytes();
-        println!("[{}]", bytes[curr]);
         while is_whitespace(bytes[curr]) || bytes[curr] == COLON {
             curr += 1;
         }
         self.packet = &self.packet[curr..];
-        println!("packet: {}", self.packet);
 
         // Parse the line value
         let bytes = self.packet.as_bytes();
@@ -201,7 +197,6 @@ impl<'a> Parser<'a, Header> {
         let value = &self.packet[0..curr];
         self.packet = &self.packet[curr + 2..];
 
-        println!("{:#?}: {:#?}", key, value);
         self.request.header.insert(key, value);
     }
 }
@@ -213,7 +208,6 @@ impl<'a> Parse for Parser<'a, Header> {
         let mut curr = 0;
         let mut bytes = self.packet.as_bytes();
         while bytes.len() >= 2 && !is_crlf(&[bytes[0], bytes[1]]) {
-            println!("parse_line: {}", curr);
             self.parse_line();
             curr += 1;
             bytes = self.packet.as_bytes();
