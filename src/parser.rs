@@ -205,11 +205,9 @@ impl<'a> Parse for Parser<'a, Header> {
     type NextState = Parser<'a, Body>;
 
     fn parse(mut self) -> Self::NextState {
-        let mut curr = 0;
         let mut bytes = self.packet.as_bytes();
         while bytes.len() >= 2 && !is_crlf(&[bytes[0], bytes[1]]) {
             self.parse_line();
-            curr += 1;
             bytes = self.packet.as_bytes();
         }
         self.skip_crlf();
