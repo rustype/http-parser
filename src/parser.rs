@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use thiserror::Error;
 
 #[doc(hidden)]
 const SPACE: u8 = ' ' as u8;
@@ -10,6 +11,8 @@ const CR: u8 = '\r' as u8;
 const LF: u8 = '\n' as u8;
 #[doc(hidden)]
 const TAB: u8 = '\t' as u8;
+
+type Result<'a, T> = std::result::Result<T, ParsingError<'a>>;
 
 /// The HTTP request structure.
 ///
@@ -247,6 +250,12 @@ impl<'a> Parse for Parser<'a, Body> {
 //         _ => false,
 //     }
 // }
+
+#[derive(Debug, Error)]
+pub enum ParsingError<'a> {
+    #[error("invalid request method {0}")]
+    InvalidMethod(&'a str),
+}
 
 /// Check if a pair of bytes are CRLF.
 #[inline(always)]
