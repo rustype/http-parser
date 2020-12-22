@@ -1,12 +1,20 @@
 use std::collections::HashMap;
 
+#[doc(hidden)]
 const SPACE: u8 = ' ' as u8;
+#[doc(hidden)]
 const COLON: u8 = ':' as u8;
+#[doc(hidden)]
 const CR: u8 = '\r' as u8;
+#[doc(hidden)]
 const LF: u8 = '\n' as u8;
+#[doc(hidden)]
 const TAB: u8 = '\t' as u8;
 
-/// The HTTP request as described in RFC 2616 Chapter 5 <https://tools.ietf.org/html/rfc2616#section-5>.
+/// The HTTP request structure.
+///
+/// This structure tries to follow RFC 2616 Section 5 <https://tools.ietf.org/html/rfc2616#section-5>.
+/// Bellow you can see the expected request format.
 /// ```text
 /// Request = Request-Line
 ///           *(( general-header
@@ -62,7 +70,9 @@ pub trait Parse {
     fn parse(self) -> Self::NextState;
 }
 
-/// The `RequestLine` is defined in RFC 2616 as follows:
+/// The `RequestLine`, the parser starting state.
+///
+/// It is defined in RFC 2616 as follows:
 /// ```text
 /// Request-Line = Method SP Request-URI SP HTTP-Version CRLF
 /// ```
@@ -157,6 +167,7 @@ impl<'a> Parse for Parser<'a, RequestLine> {
     }
 }
 
+/// The `Header` state, this state should be reached *after* the `RequestLine` state.
 #[derive(Debug)]
 pub struct Header;
 
@@ -229,18 +240,18 @@ impl<'a> Parse for Parser<'a, Body> {
     }
 }
 
-/// Checks if the given string slice is a valid HTTP method according to
-/// IETF RFC 2616 [5.1.1](https://tools.ietf.org/html/rfc2616#section-5.1.1).
-///
-/// Supported valid methods are:
-/// - `OPTIONS`
-/// - `GET`
-/// - `HEAD`
-/// - `POST`
-/// - `PUT`
-/// - `DELETE`
-/// - `TRACE`
-/// - `CONNECT`
+// Checks if the given string slice is a valid HTTP method according to
+// IETF RFC 2616 [5.1.1](https://tools.ietf.org/html/rfc2616#section-5.1.1).
+//
+// Supported valid methods are:
+// - `OPTIONS`
+// - `GET`
+// - `HEAD`
+// - `POST`
+// - `PUT`
+// - `DELETE`
+// - `TRACE`
+// - `CONNECT`
 // fn is_valid_method(method: &str) -> bool {
 //     match method {
 //         "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "TRACE" | "CONNECT" => true,
@@ -254,7 +265,7 @@ fn is_crlf(bytes: &[u8; 2]) -> bool {
     return bytes[0] == CR && bytes[1] == LF;
 }
 
-/// Check if byte is whitespace.
+/// Check if a byte is whitespace.
 #[inline(always)]
 fn is_whitespace(byte: u8) -> bool {
     return byte == SPACE || byte == LF || byte == CR || byte == TAB;
