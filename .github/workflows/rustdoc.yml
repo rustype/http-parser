@@ -32,6 +32,14 @@ jobs:
           command: doc
           args: --workspace --no-deps
 
+      - name: Write index.html
+          uses: DamianReeves/write-file-action@v1.0
+          with:
+            path: ./target/doc/index.html
+            contents: |
+              echo "<meta http-equiv=refresh content=0;url=http_parser/index.html>"
+            write-mode: overwrite
+
       - name: Deploy Docs
         uses: peaceiris/actions-gh-pages@v3
         with:
