@@ -70,17 +70,6 @@ pub trait Parse {
     fn parse(self) -> Self::NextState;
 }
 
-/// The `RequestLine`, the parser starting state.
-///
-/// It is defined in RFC 2616 as follows:
-/// ```text
-/// Request-Line = Method SP Request-URI SP HTTP-Version CRLF
-/// ```
-/// Where `SP` is defined as ASCII character 32 and
-/// `CRLF` the combination of ASCII characters 13 and 10 (`\r\n`).
-#[derive(Debug)]
-pub struct RequestLine;
-
 impl<'a, T> Parser<'a, T> {
     /// Skip existing spaces (other whitespace is not considered).
     fn skip_spaces(&mut self) {
@@ -111,6 +100,17 @@ impl<'a, T> Parser<'a, T> {
         res
     }
 }
+
+/// The `RequestLine`, the parser starting state.
+///
+/// It is defined in RFC 2616 as follows:
+/// ```text
+/// Request-Line = Method SP Request-URI SP HTTP-Version CRLF
+/// ```
+/// Where `SP` is defined as ASCII character 32 and
+/// `CRLF` the combination of ASCII characters 13 and 10 (`\r\n`).
+#[derive(Debug)]
+pub struct RequestLine;
 
 impl<'a> Parser<'a, RequestLine> {
     pub fn start(packet: &'a str) -> Parser<'a, RequestLine> {
