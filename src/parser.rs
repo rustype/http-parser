@@ -124,14 +124,11 @@ impl<'a> Parser<'a, RequestLine> {
     fn parse_method(&mut self) {
         let mut curr = 0;
         let bytes = self.packet.as_bytes();
-        for _ in bytes {
-            if bytes[curr + 1] == 32 {
-                self.request.method = &self.packet[0..=curr];
-                self.packet = &self.packet[curr + 1..];
-                break;
-            }
+        while bytes[curr] != SPACE {
             curr += 1;
         }
+        self.request.method = &self.packet[0..curr];
+        self.packet = &self.packet[curr + 1..];
         self.skip_spaces();
     }
 
