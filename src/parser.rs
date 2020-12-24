@@ -242,7 +242,9 @@ impl<'a> Parse for RequestLineParser<'a, Version> {
     }
 }
 
-/// The `Header` state, this state should be reached *after* the `RequestLine` state.
+/// The `Header` state.
+///
+/// *This state should be reached *after* the `RequestLine` state.*
 #[derive(Debug)]
 pub struct Header;
 
