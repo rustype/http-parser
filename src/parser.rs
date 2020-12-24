@@ -82,6 +82,7 @@ mod private {
 
 /// The `Parser` structure.
 #[derive(Debug)]
+// TODO rename State to S
 pub struct HttpRequestParser<'a, State>
 where
     State: RequestParserState,
