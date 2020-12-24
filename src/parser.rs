@@ -221,7 +221,11 @@ impl<'a> Parse for RequestLineParser<'a, Version> {
         while !is_crlf(&[bytes[curr], bytes[curr + 1]]) {
             curr += 1;
         }
-        self.request.http_version = &self.packet[..curr];
+        let version = &self.packet[..curr];
+        if !is_valid_version(version) {
+            return Err(ParsingError::InvalidVersion(version.to_string()));
+        }
+        self.request.http_version = version;
         self.packet = &self.packet[curr + 2..];
         Ok(HttpRequestParser {
             packet: self.packet,
@@ -320,10 +324,23 @@ fn is_valid_method(method: &str) -> bool {
     }
 }
 
+/// Checks if the HTTP version is a valid version.
+///
+/// Versions considered valid are:
+/// `HTTP/1`, `HTTP/1.0`, `HTTP/1.1`, `HTTP/2`
+fn is_valid_version(version: &str) -> bool {
+    match version {
+        "HTTP/1" | "HTTP/1.0" | "HTTP/1.1" | "HTTP/2" => true,
+        _ => false,
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum ParsingError {
     #[error("invalid request method {0}")]
     InvalidMethod(String),
+    #[error("invalid HTTP version: {0}")]
+    InvalidVersion(String),
 }
 
 /// Check if a pair of bytes are CRLF.
