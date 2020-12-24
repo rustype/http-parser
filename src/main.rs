@@ -20,7 +20,7 @@ licenseID=string&content=string&/paramsXML=string";
     println!("{:#?}", parser);
     let parser = parser.parse()?;
     println!("{:#?}", parser);
-    let parser = parser.parse();
+    let parser = parser.parse()?;
     println!("{:#?}", parser);
     let request = parser.parse();
     println!("{:#?}", request);
