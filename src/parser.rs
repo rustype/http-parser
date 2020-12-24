@@ -50,14 +50,6 @@ impl<'a> Request<'a> {
     }
 }
 
-/// The `Parser` structure.
-#[derive(Debug)]
-pub struct Parser<'a, State> {
-    packet: &'a str,
-    request: Request<'a>,
-    state: State,
-}
-
 /// The provides the means of state transition for the parser,
 /// it provides a single function `parse`,
 /// when called it is supposed to parse the stream until the completion of the current state.
@@ -71,6 +63,14 @@ pub trait Parse {
     /// Parse the existing content consuming it in the process,
     /// in the end, return the next parser state.
     fn parse(self) -> Self::NextState;
+}
+
+/// The `Parser` structure.
+#[derive(Debug)]
+pub struct Parser<'a, State> {
+    packet: &'a str,
+    request: Request<'a>,
+    state: State,
 }
 
 impl<'a, T> Parser<'a, T> {
