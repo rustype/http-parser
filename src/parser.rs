@@ -381,6 +381,9 @@ pub enum ParsingError {
     /// An invalid version was detected (e.g. `HTTP/0`).
     #[error("invalid HTTP version: {0}")]
     InvalidVersion(String),
+    /// Unexpected reach to the end of the packet.
+    #[error("unexpected end of packet")]
+    UnexpectedEndOfPacket(String)
 }
 
 /// Check if a pair of bytes are CRLF.
