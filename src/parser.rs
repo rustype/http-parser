@@ -169,7 +169,7 @@ type RequestLineParser<'a, S> = HttpRequestParser<'a, RequestLine<S>>;
 pub struct Method;
 
 impl<'a> Parse for RequestLineParser<'a, Method> {
-    type NextState = Result<HttpRequestParser<'a, RequestLine<Uri>>>;
+    type NextState = Result<RequestLineParser<'a, Uri>>;
 
     fn parse(mut self) -> Self::NextState {
         let mut curr = 0;
@@ -196,7 +196,7 @@ impl<'a> Parse for RequestLineParser<'a, Method> {
 pub struct Uri;
 
 impl<'a> Parse for RequestLineParser<'a, Uri> {
-    type NextState = Result<HttpRequestParser<'a, RequestLine<Version>>>;
+    type NextState = Result<RequestLineParser<'a, Version>>;
 
     fn parse(mut self) -> Self::NextState {
         self.request.request_uri = self.parse_until_char(SPACE);
