@@ -122,7 +122,8 @@ where
         self.packet = &self.packet[curr..];
     }
 
-    /// If the next two characters are
+    /// If the next two characters are `\r\n`.
+    // TODO what should we do when there are no bytes left?
     fn skip_crlf(&mut self) {
         let bytes = self.packet.as_bytes();
         if is_crlf(&[bytes[0], bytes[1]]) {
