@@ -71,6 +71,8 @@ pub trait Parse {
 /// *This trait is sealed.*
 pub trait RequestParserState: SealedRequestParserState {}
 
+// TODO move this to the top of the crate
+// TODO add more traits
 #[doc(hidden)]
 mod private {
     pub trait SealedRequestParserState {}
