@@ -161,53 +161,7 @@ impl<'a, S> HttpRequestParser<'a, RequestLine<S>> {
             state: RequestLine { state: Method },
         }
     }
-
-    // fn parse_method(&mut self) -> Result<()> {
-    //     let mut curr = 0;
-    //     let bytes = self.packet.as_bytes();
-    //     while bytes[curr] != SPACE {
-    //         curr += 1;
-    //     }
-    //     let method = &self.packet[0..curr];
-    //     if !is_valid_method(method) {
-    //         return Err(ParsingError::InvalidMethod(method.to_string()));
-    //     }
-    //     self.request.method = method;
-    //     self.packet = &self.packet[curr + 1..];
-    //     self.skip_spaces();
-    //     Ok(())
-    // }
-
-    // fn parse_request_uri(&mut self) {
-    //     self.request.request_uri = self.parse_until_char(SPACE);
-    //     self.skip_spaces();
-    // }
-
-    // fn parse_version(&mut self) {
-    //     let mut curr = 0;
-    //     let bytes = self.packet.as_bytes();
-    //     while !is_crlf(&[bytes[curr], bytes[curr + 1]]) {
-    //         curr += 1;
-    //     }
-    //     self.request.http_version = &self.packet[..curr];
-    //     self.packet = &self.packet[curr + 2..];
-    // }
 }
-
-// impl<'a, S> Parse for HttpRequestParser<'a, RequestLine<S>> {
-//     type NextState = Result<HttpRequestParser<'a, Header>>;
-
-//     fn parse(mut self) -> Self::NextState {
-//         self.parse_method()?;
-//         self.parse_request_uri();
-//         self.parse_version();
-//         Ok(HttpRequestParser::<Header> {
-//             packet: self.packet,
-//             request: self.request,
-//             state: PhantomData,
-//         })
-//     }
-// }
 
 type RequestLineParser<'a, S> = HttpRequestParser<'a, RequestLine<S>>;
 
