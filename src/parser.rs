@@ -159,6 +159,7 @@ pub struct RequestLine<S> {
 impl<S> RequestParserState for RequestLine<S> {}
 
 impl<'a, S> HttpRequestParser<'a, RequestLine<S>> {
+    /// Create a new `HttpRequestParser` which starts in `RequestLine<Method>`.
     pub fn start(packet: &'a str) -> HttpRequestParser<'a, RequestLine<Method>> {
         HttpRequestParser {
             packet,
