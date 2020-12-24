@@ -169,6 +169,7 @@ impl<'a, S> HttpRequestParser<'a, RequestLine<S>> {
     }
 }
 
+/// The method of the request line.
 #[derive(Debug)]
 pub struct Method;
 
@@ -196,6 +197,7 @@ impl<'a> Parse for RequestLineParser<'a, Method> {
     }
 }
 
+/// The URI of the request line.
 #[derive(Debug)]
 pub struct Uri;
 
@@ -213,6 +215,7 @@ impl<'a> Parse for RequestLineParser<'a, Uri> {
     }
 }
 
+/// The HTTP version part of the request line.
 #[derive(Debug)]
 pub struct Version;
 
