@@ -301,7 +301,7 @@ impl<'a> Parse for HttpRequestParser<'a, Header> {
 
 /// The `Body` state.
 ///
-/// This state should be reached *after* the `Header` state.
+/// *This state should be reached *after* the `Header` state.*
 #[derive(Debug)]
 pub struct Body;
 
