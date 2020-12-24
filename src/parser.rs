@@ -337,7 +337,7 @@ fn is_valid_version(version: &str) -> bool {
 
 #[derive(Debug, Error)]
 pub enum ParsingError {
-    #[error("invalid request method {0}")]
+    #[error("invalid HTTP request method: {0}")]
     InvalidMethod(String),
     #[error("invalid HTTP version: {0}")]
     InvalidVersion(String),
