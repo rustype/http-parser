@@ -128,12 +128,15 @@ where
     }
 
     /// If the next two characters are `\r\n`.
-    // TODO what should we do when there are no bytes left?
-    fn skip_crlf(&mut self) {
+    fn skip_crlf(&mut self) -> Result<()> {
         let bytes = self.packet.as_bytes();
+        if self.packet.len() < 2 {
+            return Err(ParsingError::UnexpectedEndOfPacket);
+        }
         if is_crlf(&[bytes[0], bytes[1]]) {
             self.packet = &self.packet[2..];
         }
+        Ok(())
     }
 
     fn parse_until_char(&mut self, chr: u8) -> &'a str {
@@ -304,7 +307,7 @@ impl<'a> HttpRequestParser<'a, Header> {
 }
 
 impl<'a> Parse for HttpRequestParser<'a, Header> {
-    type NextState = HttpRequestParser<'a, Body>;
+    type NextState = Result<HttpRequestParser<'a, Body>>;
 
     fn parse(mut self) -> Self::NextState {
         let mut bytes = self.packet.as_bytes();
@@ -312,12 +315,12 @@ impl<'a> Parse for HttpRequestParser<'a, Header> {
             self.parse_line();
             bytes = self.packet.as_bytes();
         }
-        self.skip_crlf();
-        Self::NextState {
+        self.skip_crlf()?;
+        Ok(HttpRequestParser {
             packet: self.packet,
             request: self.request,
             state: Body,
-        }
+        })
     }
 }
 
@@ -383,7 +386,7 @@ pub enum ParsingError {
     InvalidVersion(String),
     /// Unexpected reach to the end of the packet.
     #[error("unexpected end of packet")]
-    UnexpectedEndOfPacket(String)
+    UnexpectedEndOfPacket,
 }
 
 /// Check if a pair of bytes are CRLF.
