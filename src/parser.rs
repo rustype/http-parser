@@ -66,8 +66,12 @@ pub trait Parse {
     fn parse(self) -> Self::NextState;
 }
 
+/// A trait for the request parser states.
+///
+/// *This trait is sealed.*
 pub trait RequestParserState: SealedRequestParserState {}
 
+#[doc(hidden)]
 mod private {
     pub trait SealedRequestParserState {}
 
