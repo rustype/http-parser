@@ -16,6 +16,7 @@ const TAB: u8 = '\t' as u8;
 /// Possible transitions which can error return `Result<T, ParsingError>`.
 type Result<T> = std::result::Result<T, ParsingError>;
 
+/// Short form for `HttpRequestParser<'a, RequestLine<S>>`.
 type RequestLineParser<'a, S> = HttpRequestParser<'a, RequestLine<S>>;
 
 // TODO add more traits
