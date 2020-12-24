@@ -48,6 +48,18 @@ pub struct Request<'a> {
     body: &'a str,
 }
 
+// #[derive(Debug)]
+// pub enum RequestMethod {
+//     Options,
+//     Get,
+//     Head,
+//     Post,
+//     Put,
+//     Delete,
+//     Trace,
+//     Connect,
+// }
+
 impl<'a> Request<'a> {
     /// Create a new `Request`.
     fn new() -> Self {
