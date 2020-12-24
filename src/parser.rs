@@ -251,6 +251,7 @@ pub struct Header;
 impl RequestParserState for Header {}
 
 impl<'a> HttpRequestParser<'a, Header> {
+    /// Parse a line in the header.
     fn parse_line(&mut self) {
         // Parse the line key
         let mut curr = 0;
