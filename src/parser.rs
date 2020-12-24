@@ -1,4 +1,4 @@
-use private::SealedRequestParserState;
+use private::{SealedRequestLineParserState, SealedRequestParserState};
 use std::collections::HashMap;
 use thiserror::Error;
 
@@ -19,14 +19,19 @@ type Result<T> = std::result::Result<T, ParsingError>;
 /// Short form for `HttpRequestParser<'a, RequestLine<S>>`.
 type RequestLineParser<'a, S> = HttpRequestParser<'a, RequestLine<S>>;
 
-// TODO add more traits
 #[doc(hidden)]
 mod private {
     pub trait SealedRequestParserState {}
 
-    impl<S> SealedRequestParserState for super::RequestLine<S> {}
+    impl<S> SealedRequestParserState for super::RequestLine<S> where S: super::RequestLineParserState {}
     impl SealedRequestParserState for super::Header {}
     impl SealedRequestParserState for super::Body {}
+
+    pub trait SealedRequestLineParserState {}
+
+    impl SealedRequestLineParserState for super::Method {}
+    impl SealedRequestLineParserState for super::Uri {}
+    impl SealedRequestLineParserState for super::Version {}
 }
 
 /// The HTTP request structure.
@@ -142,6 +147,10 @@ where
         res
     }
 }
+/// A trait for request line parser states.
+///
+/// *This trait is sealed.*
+pub trait RequestLineParserState: SealedRequestLineParserState {}
 
 /// The `RequestLine`, the parser starting state.
 ///
@@ -152,13 +161,19 @@ where
 /// Where `SP` is defined as ASCII character 32 and
 /// `CRLF` the combination of ASCII characters 13 and 10 (`\r\n`).
 #[derive(Debug)]
-pub struct RequestLine<S> {
+pub struct RequestLine<S>
+where
+    S: RequestLineParserState,
+{
     state: S,
 }
 
-impl<S> RequestParserState for RequestLine<S> {}
+impl<S> RequestParserState for RequestLine<S> where S: RequestLineParserState {}
 
-impl<'a, S> HttpRequestParser<'a, RequestLine<S>> {
+impl<'a, S> HttpRequestParser<'a, RequestLine<S>>
+where
+    S: RequestLineParserState,
+{
     /// Create a new `HttpRequestParser` which starts in `RequestLine<Method>`.
     pub fn start(packet: &'a str) -> HttpRequestParser<'a, RequestLine<Method>> {
         HttpRequestParser {
@@ -172,6 +187,8 @@ impl<'a, S> HttpRequestParser<'a, RequestLine<S>> {
 /// The method of the request line.
 #[derive(Debug)]
 pub struct Method;
+
+impl RequestLineParserState for Method {}
 
 impl<'a> Parse for RequestLineParser<'a, Method> {
     type NextState = Result<RequestLineParser<'a, Uri>>;
@@ -201,6 +218,8 @@ impl<'a> Parse for RequestLineParser<'a, Method> {
 #[derive(Debug)]
 pub struct Uri;
 
+impl RequestLineParserState for Uri {}
+
 impl<'a> Parse for RequestLineParser<'a, Uri> {
     type NextState = Result<RequestLineParser<'a, Version>>;
 
@@ -218,6 +237,8 @@ impl<'a> Parse for RequestLineParser<'a, Uri> {
 /// The HTTP version part of the request line.
 #[derive(Debug)]
 pub struct Version;
+
+impl RequestLineParserState for Version {}
 
 impl<'a> Parse for RequestLineParser<'a, Version> {
     type NextState = Result<HttpRequestParser<'a, Header>>;
