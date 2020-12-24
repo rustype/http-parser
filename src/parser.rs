@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use private::SealedRequestParserState;
+use std::{collections::HashMap, marker::PhantomData};
 use thiserror::Error;
 
 #[doc(hidden)]
@@ -65,15 +66,31 @@ pub trait Parse {
     fn parse(self) -> Self::NextState;
 }
 
-/// The `Parser` structure.
-#[derive(Debug)]
-pub struct Parser<'a, State> {
-    packet: &'a str,
-    request: Request<'a>,
-    state: State,
+pub trait RequestParserState: SealedRequestParserState {}
+
+mod private {
+    pub trait SealedRequestParserState {}
+
+    impl SealedRequestParserState for super::RequestLine {}
+    impl SealedRequestParserState for super::Header {}
+    impl SealedRequestParserState for super::Body {}
 }
 
-impl<'a, T> Parser<'a, T> {
+/// The `Parser` structure.
+#[derive(Debug)]
+pub struct HttpRequestParser<'a, State>
+where
+    State: RequestParserState,
+{
+    packet: &'a str,
+    request: Request<'a>,
+    state: PhantomData<State>,
+}
+
+impl<'a, T> HttpRequestParser<'a, T>
+where
+    T: RequestParserState,
+{
     /// Skip existing spaces (other whitespace is not considered).
     fn skip_spaces(&mut self) {
         let mut curr = 0;
@@ -115,12 +132,14 @@ impl<'a, T> Parser<'a, T> {
 #[derive(Debug)]
 pub struct RequestLine;
 
-impl<'a> Parser<'a, RequestLine> {
-    pub fn start(packet: &'a str) -> Parser<'a, RequestLine> {
-        Parser {
+impl RequestParserState for RequestLine {}
+
+impl<'a> HttpRequestParser<'a, RequestLine> {
+    pub fn start(packet: &'a str) -> HttpRequestParser<'a, RequestLine> {
+        HttpRequestParser {
             packet,
             request: Request::new(),
-            state: RequestLine,
+            state: PhantomData,
         }
     }
 
@@ -156,17 +175,17 @@ impl<'a> Parser<'a, RequestLine> {
     }
 }
 
-impl<'a> Parse for Parser<'a, RequestLine> {
-    type NextState = Result<Parser<'a, Header>>;
+impl<'a> Parse for HttpRequestParser<'a, RequestLine> {
+    type NextState = Result<HttpRequestParser<'a, Header>>;
 
     fn parse(mut self) -> Self::NextState {
         self.parse_method()?;
         self.parse_request_uri();
         self.parse_version();
-        Ok(Parser::<Header> {
+        Ok(HttpRequestParser::<Header> {
             packet: self.packet,
             request: self.request,
-            state: Header,
+            state: PhantomData,
         })
     }
 }
@@ -175,7 +194,9 @@ impl<'a> Parse for Parser<'a, RequestLine> {
 #[derive(Debug)]
 pub struct Header;
 
-impl<'a> Parser<'a, Header> {
+impl RequestParserState for Header {}
+
+impl<'a> HttpRequestParser<'a, Header> {
     fn parse_line(&mut self) {
         // Parse the line key
         let mut curr = 0;
@@ -206,8 +227,8 @@ impl<'a> Parser<'a, Header> {
     }
 }
 
-impl<'a> Parse for Parser<'a, Header> {
-    type NextState = Parser<'a, Body>;
+impl<'a> Parse for HttpRequestParser<'a, Header> {
+    type NextState = HttpRequestParser<'a, Body>;
 
     fn parse(mut self) -> Self::NextState {
         let mut bytes = self.packet.as_bytes();
@@ -219,7 +240,7 @@ impl<'a> Parse for Parser<'a, Header> {
         Self::NextState {
             packet: self.packet,
             request: self.request,
-            state: Body,
+            state: PhantomData,
         }
     }
 }
@@ -228,7 +249,9 @@ impl<'a> Parse for Parser<'a, Header> {
 #[derive(Debug)]
 pub struct Body;
 
-impl<'a> Parse for Parser<'a, Body> {
+impl RequestParserState for Body {}
+
+impl<'a> Parse for HttpRequestParser<'a, Body> {
     type NextState = Request<'a>;
 
     fn parse(mut self) -> Self::NextState {
