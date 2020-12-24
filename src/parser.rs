@@ -15,6 +15,8 @@ const TAB: u8 = '\t' as u8;
 
 type Result<T> = std::result::Result<T, ParsingError>;
 
+type RequestLineParser<'a, S> = HttpRequestParser<'a, RequestLine<S>>;
+
 // TODO add more traits
 #[doc(hidden)]
 mod private {
@@ -162,8 +164,6 @@ impl<'a, S> HttpRequestParser<'a, RequestLine<S>> {
         }
     }
 }
-
-type RequestLineParser<'a, S> = HttpRequestParser<'a, RequestLine<S>>;
 
 #[derive(Debug)]
 pub struct Method;
