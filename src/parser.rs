@@ -15,6 +15,16 @@ const TAB: u8 = '\t' as u8;
 
 type Result<T> = std::result::Result<T, ParsingError>;
 
+// TODO add more traits
+#[doc(hidden)]
+mod private {
+    pub trait SealedRequestParserState {}
+
+    impl SealedRequestParserState for super::RequestLine {}
+    impl SealedRequestParserState for super::Header {}
+    impl SealedRequestParserState for super::Body {}
+}
+
 /// The HTTP request structure.
 ///
 /// This structure tries to follow RFC 2616 Section 5 <https://tools.ietf.org/html/rfc2616#section-5>.
@@ -70,17 +80,6 @@ pub trait Parse {
 ///
 /// *This trait is sealed.*
 pub trait RequestParserState: SealedRequestParserState {}
-
-// TODO move this to the top of the crate
-// TODO add more traits
-#[doc(hidden)]
-mod private {
-    pub trait SealedRequestParserState {}
-
-    impl SealedRequestParserState for super::RequestLine {}
-    impl SealedRequestParserState for super::Header {}
-    impl SealedRequestParserState for super::Body {}
-}
 
 /// The `Parser` structure.
 #[derive(Debug)]
