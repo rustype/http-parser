@@ -335,6 +335,7 @@ fn is_valid_version(version: &str) -> bool {
     }
 }
 
+/// Errors types for the parser.
 #[derive(Debug, Error)]
 pub enum ParsingError {
     #[error("invalid HTTP request method: {0}")]
