@@ -83,14 +83,13 @@ pub trait RequestParserState: SealedRequestParserState {}
 
 /// The `Parser` structure.
 #[derive(Debug)]
-// TODO rename State to S
-pub struct HttpRequestParser<'a, State>
+pub struct HttpRequestParser<'a, S>
 where
-    State: RequestParserState,
+    S: RequestParserState,
 {
     packet: &'a str,
     request: Request<'a>,
-    state: PhantomData<State>,
+    state: PhantomData<S>,
 }
 
 impl<'a, T> HttpRequestParser<'a, T>
