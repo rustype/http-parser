@@ -290,15 +290,21 @@ impl<'a> Parse for HttpRequestParser<'a, Header> {
     }
 }
 
-/// The `Body` state, this state should be reached *after* the `Header` state.
+/// The `Body` state.
+///
+/// This state should be reached *after* the `Header` state.
 #[derive(Debug)]
 pub struct Body;
 
 impl RequestParserState for Body {}
 
 impl<'a> Parse for HttpRequestParser<'a, Body> {
+    /// Since the body is the last element of the request,
+    /// the next possible state is final and thus returns the parsed request.
     type NextState = Request<'a>;
 
+    /// Parse the body (which is composed of all remaining bytes)
+    /// and return the next state.
     fn parse(mut self) -> Self::NextState {
         self.request.body = self.packet;
         self.request
